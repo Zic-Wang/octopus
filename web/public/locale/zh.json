@@ -86,7 +86,8 @@
             "todayStatsTitle": "今日统计",
             "weekStats": "本周请求",
             "weekTotalStats": "本周全部",
-            "weekStatsTitle": "本周统计"
+            "weekStatsTitle": "本周统计",
+            "todayWeekStatsTitle": "今日 / 本周"
         },
         "chart": {
             "totalRequests": "请求次数",

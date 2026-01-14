@@ -86,7 +86,8 @@
             "todayStatsTitle": "Today",
             "weekStats": "This Week Requests",
             "weekTotalStats": "This Week Total",
-            "weekStatsTitle": "This Week"
+            "weekStatsTitle": "This Week",
+            "todayWeekStatsTitle": "Today / This Week"
         },
         "chart": {
             "totalRequests": "Total Requests",
