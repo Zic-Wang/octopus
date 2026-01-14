@@ -325,6 +325,29 @@ func StatsTodayGet() model.StatsDaily {
 	return statsDailyCache
 }
 
+// StatsWeekGet 获取本周统计数据（从数据库聚合最近7天的数据）
+func StatsWeekGet(ctx context.Context) (model.StatsMetrics, error) {
+	now := time.Now()
+	// 计算本周一的日期
+	weekday := int(now.Weekday())
+	if weekday == 0 {
+		weekday = 7 // 周日算作第7天
+	}
+	mondayDate := now.AddDate(0, 0, -(weekday - 1)).Format("20060102")
+
+	var result model.StatsMetrics
+	err := db.GetDB().WithContext(ctx).
+		Model(&model.StatsDaily{}).
+		Select("COALESCE(SUM(input_token), 0) as input_token, COALESCE(SUM(output_token), 0) as output_token, COALESCE(SUM(input_cost), 0) as input_cost, COALESCE(SUM(output_cost), 0) as output_cost, COALESCE(SUM(wait_time), 0) as wait_time, COALESCE(SUM(request_success), 0) as request_success, COALESCE(SUM(request_failed), 0) as request_failed").
+		Where("date >= ?", mondayDate).
+		Scan(&result).Error
+
+	if err != nil {
+		return model.StatsMetrics{}, err
+	}
+	return result, nil
+}
+
 func StatsChannelGet(id int) model.StatsChannel {
 	stats, ok := statsChannelCache.Get(id)
 	if !ok {

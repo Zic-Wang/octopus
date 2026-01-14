@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bestruirui/octopus/internal/helper"
+	gmodel "github.com/bestruirui/octopus/internal/model"
 	"github.com/bestruirui/octopus/internal/op"
 	"github.com/bestruirui/octopus/internal/relay/balancer"
 	"github.com/bestruirui/octopus/internal/server/resp"
@@ -49,12 +50,19 @@ func Handler(inboundType inbound.InboundType, c *gin.Context) {
 		return
 	}
 
+	// 过滤掉禁用渠道的 items
+	enabledItems := filterEnabledChannelItems(group.Items, c.Request.Context())
+	if len(enabledItems) == 0 {
+		resp.Error(c, http.StatusServiceUnavailable, "no enabled channel available")
+		return
+	}
+
 	const maxRounds = 3
 	var lastErr error
-	itemCount := len(group.Items)
+	itemCount := len(enabledItems)
 	b := balancer.GetBalancer(group.Mode)
 	for round := 0; round < maxRounds; round++ {
-		item := b.Select(group.Items)
+		item := b.Select(enabledItems)
 		if item == nil {
 			resp.Error(c, http.StatusServiceUnavailable, "no available channel")
 			return
@@ -72,13 +80,7 @@ func Handler(inboundType inbound.InboundType, c *gin.Context) {
 			if err != nil {
 				log.Warnf("failed to get channel: %v", err)
 				lastErr = err
-				item = b.Next(group.Items, item)
-				continue
-			}
-			if channel.Enabled == false {
-				log.Warnf("channel %s is disabled", channel.Name)
-				lastErr = fmt.Errorf("channel %s is disabled", channel.Name)
-				item = b.Next(group.Items, item)
+				item = b.Next(enabledItems, item)
 				continue
 			}
 
@@ -91,7 +93,7 @@ func Handler(inboundType inbound.InboundType, c *gin.Context) {
 			if outAdapter == nil {
 				log.Warnf("unsupported channel type: %d for channel: %s", channel.Type, channel.Name)
 				lastErr = fmt.Errorf("unsupported channel type: %d", channel.Type)
-				item = b.Next(group.Items, item)
+				item = b.Next(enabledItems, item)
 				continue
 			}
 
@@ -126,7 +128,7 @@ func Handler(inboundType inbound.InboundType, c *gin.Context) {
 				}
 				lastErr = fmt.Errorf("channel %s failed: %v", channel.Name, err)
 			}
-			item = b.Next(group.Items, item)
+			item = b.Next(enabledItems, item)
 		}
 	}
 
@@ -384,4 +386,23 @@ func (rc *relayContext) collectResponse() {
 
 	// 设置响应内容
 	rc.metrics.SetInternalResponse(internalResponse)
+}
+
+// filterEnabledChannelItems 过滤掉禁用渠道的 items
+func filterEnabledChannelItems(items []gmodel.GroupItem, ctx context.Context) []gmodel.GroupItem {
+	if len(items) == 0 {
+		return items
+	}
+
+	result := make([]gmodel.GroupItem, 0, len(items))
+	for _, item := range items {
+		channel, err := op.ChannelGet(item.ChannelID, ctx)
+		if err != nil {
+			continue
+		}
+		if channel.Enabled {
+			result = append(result, item)
+		}
+	}
+	return result
 }

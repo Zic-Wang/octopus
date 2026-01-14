@@ -18,6 +18,10 @@ func init() {
 				Handle(getStatsToday),
 		).
 		AddRoute(
+			router.NewRoute("/week", http.MethodGet).
+				Handle(getStatsWeek),
+		).
+		AddRoute(
 			router.NewRoute("/daily", http.MethodGet).
 				Handle(getStatsDaily),
 		).
@@ -37,6 +41,15 @@ func init() {
 
 func getStatsToday(c *gin.Context) {
 	resp.Success(c, op.StatsTodayGet())
+}
+
+func getStatsWeek(c *gin.Context) {
+	statsWeek, err := op.StatsWeekGet(c.Request.Context())
+	if err != nil {
+		resp.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	resp.Success(c, statsWeek)
 }
 
 func getStatsDaily(c *gin.Context) {
