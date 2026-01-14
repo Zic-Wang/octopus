@@ -79,7 +79,14 @@
             "inputTokens": "Input Tokens",
             "inputCost": "Input Cost",
             "outputTokens": "Output Tokens",
-            "outputCost": "Output Cost"
+            "outputCost": "Output Cost",
+            "allTimeStats": "All Time",
+            "todayStats": "Today Requests",
+            "todayTotalStats": "Today Total",
+            "todayStatsTitle": "Today",
+            "weekStats": "This Week Requests",
+            "weekTotalStats": "This Week Total",
+            "weekStatsTitle": "This Week"
         },
         "chart": {
             "totalRequests": "Total Requests",

@@ -79,7 +79,14 @@
             "inputTokens": "输入 Tokens",
             "inputCost": "输入费用",
             "outputTokens": "输出 Tokens",
-            "outputCost": "输出费用"
+            "outputCost": "输出费用",
+            "allTimeStats": "历史总计",
+            "todayStats": "今日请求",
+            "todayTotalStats": "今日全部",
+            "todayStatsTitle": "今日统计",
+            "weekStats": "本周请求",
+            "weekTotalStats": "本周全部",
+            "weekStatsTitle": "本周统计"
         },
         "chart": {
             "totalRequests": "请求次数",

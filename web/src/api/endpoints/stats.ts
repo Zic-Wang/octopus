@@ -72,6 +72,44 @@ export function useStatsToday() {
         queryFn: async () => {
             return apiClient.get<StatsDaily>('/api/v1/stats/today');
         },
+        select: (data) => ({
+            input_token: formatCount(data.input_token),
+            output_token: formatCount(data.output_token),
+            total_token: formatCount(data.input_token + data.output_token),
+            input_cost: formatMoney(data.input_cost),
+            output_cost: formatMoney(data.output_cost),
+            total_cost: formatMoney(data.input_cost + data.output_cost),
+            wait_time: formatTime(data.wait_time),
+            request_success: formatCount(data.request_success),
+            request_failed: formatCount(data.request_failed),
+            request_count: formatCount(data.request_success + data.request_failed),
+        }),
+        refetchInterval: 30000,
+        refetchOnMount: 'always',
+    });
+}
+
+/**
+ * 获取本周统计数据 Hook
+ */
+export function useStatsWeek() {
+    return useQuery({
+        queryKey: ['stats', 'week'],
+        queryFn: async () => {
+            return apiClient.get<StatsMetrics>('/api/v1/stats/week');
+        },
+        select: (data) => ({
+            input_token: formatCount(data.input_token),
+            output_token: formatCount(data.output_token),
+            total_token: formatCount(data.input_token + data.output_token),
+            input_cost: formatMoney(data.input_cost),
+            output_cost: formatMoney(data.output_cost),
+            total_cost: formatMoney(data.input_cost + data.output_cost),
+            wait_time: formatTime(data.wait_time),
+            request_success: formatCount(data.request_success),
+            request_failed: formatCount(data.request_failed),
+            request_count: formatCount(data.request_success + data.request_failed),
+        }),
         refetchInterval: 30000,
         refetchOnMount: 'always',
     });
